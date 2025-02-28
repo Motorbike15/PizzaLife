@@ -1,158 +1,24 @@
-if game:GetService("RunService"):IsClient() then
+-- Server-Side giveItems function (in your GitHub script)
+local function giveItems(player)
+    local items = {"Remington 870", "M9", "Keycard", "AK47"}
+    local backpack = player.Backpack
 
-    local screenGui = Instance.new("ScreenGui")
-    screenGui.Name = "GunGiverGUI"
-    screenGui.Parent = game.Players.LocalPlayer.PlayerGui
-    screenGui.ResetOnSpawn = false
-    screenGui.Enabled = true
-
-    local mainFrame = Instance.new("Frame")
-    mainFrame.Size = UDim2.new(0, 200, 0, 150)
-    mainFrame.Position = UDim2.new(0.5, -100, 0.5, -75)
-    mainFrame.BackgroundColor3 = Color3.new(1,1,1)
-    mainFrame.BackgroundTransparency = 0.5
-    mainFrame.BorderSizePixel = 0
-    mainFrame.Parent = screenGui
-    mainFrame.Draggable = true
-    mainFrame.ClipsDescendants = true
-
-    local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(0, 15)
-    UICorner.Parent = mainFrame
-
-    local titleLabel = Instance.new("TextLabel")
-    titleLabel.Size = UDim2.new(1, 0, 0.2, 0)
-    titleLabel.Position = UDim2.new(0, 0, 0, 0)
-    titleLabel.BackgroundColor3 = Color3.new(1,1,1)
-    titleLabel.BackgroundTransparency = 1
-    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    titleLabel.Text = "Gun Giver"
-    titleLabel.TextScaled = true
-    titleLabel.Parent = mainFrame
-
-    local gunsButton = Instance.new("TextButton")
-    gunsButton.Size = UDim2.new(0.8, 0, 0.3, 0)
-    gunsButton.Position = UDim2.new(0.1, 0, 0.3, 0)
-    gunsButton.BackgroundColor3 = Color3.new(1,1,1)
-    gunsButton.BackgroundTransparency = 0.5
-    gunsButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    gunsButton.Text = "Guns"
-    gunsButton.Parent = mainFrame
-
-    local gunsButtonCorner = Instance.new("UICorner")
-    gunsButtonCorner.CornerRadius = UDim.new(0, 10)
-    gunsButtonCorner.Parent = gunsButton
-
-    local closeButton = Instance.new("TextButton")
-    closeButton.Size = UDim2.new(0.2, 0, 0.2, 0)
-    closeButton.Position = UDim2.new(0.8, 0, 0, 0)
-    closeButton.BackgroundColor3 = Color3.new(1,1,1)
-    closeButton.BackgroundTransparency = 0.5
-    closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    closeButton.Text = "X"
-    closeButton.Parent = mainFrame
-
-    local closeButtonCorner = Instance.new("UICorner")
-    closeButtonCorner.CornerRadius = UDim.new(0, 10)
-    closeButtonCorner.Parent = closeButton
-
-    closeButton.MouseButton1Click:Connect(function()
-        screenGui:Destroy()
-    end)
-
-    -- Mobile Compatibility (using InputBegan)
-    local function onInput(input, gameProcessedEvent)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            local object = input.UserInputObject
-            if object and object.Parent == gunsButton then
-                -- Fire a RemoteEvent to the server
-                game.ReplicatedStorage.GiveGuns:FireServer()
+    for _, itemName in ipairs(items) do
+        local foundTool = nil
+        -- Search specifically for tools
+        for _, obj in ipairs(game:GetDescendants()) do
+            if obj:IsA("Tool") and obj.Name == itemName then
+                foundTool = obj
+                break
             end
         end
-    end
 
-    -- Connect InputBegan
-    game:GetService("UserInputService").InputBegan:Connect(onInput)
-
-    -- Connect MouseButton1Click (for desktop)
-    gunsButton.MouseButton1Click:Connect(function()
-        game.ReplicatedStorage.GiveGuns:FireServer()
-    end)
-
-    -- Mobile dragging
-    local dragging = nil
-    local dragInput = nil
-    local dragStart = nil
-    local dragGuiStart = nil
-
-    mainFrame.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            dragInput = input
-            dragStart = input.Position
-            dragGuiStart = mainFrame.Position
-        end
-    end)
-
-    mainFrame.InputChanged:Connect(function(input)
-        if dragging and input == dragInput then
-            local delta = input.Position - dragStart
-            mainFrame.Position = UDim2.new(dragGuiStart.X.Scale, dragGuiStart.X.Offset + delta.X, dragGuiStart.Y.Scale, dragGuiStart.Y.Offset + delta.Y)
-        end
-    end)
-
-    mainFrame.InputEnded:Connect(function(input)
-        if dragging and input == dragInput then
-            dragging = false
-        end
-    end)
-
-    -- Rainbow Color Change
-    local function rainbowColor()
-        local hue = tick() % 1
-        local color = Color3.fromHSV(hue, 1, 1)
-        mainFrame.BackgroundColor3 = color
-    end
-
-    game:GetService("RunService").Heartbeat:Connect(rainbowColor)
-
-else -- Server Side
-
-    local function giveItems(player)
-        local items = {"Remington 870", "M9", "Keycard", "AK47"}
-        local backpack = player.Backpack
-        local character = player.Character
-
-        if not character then
-            return
-        end
-
-        for _, itemName in ipairs(items) do
-            local foundItem = nil
-            -- Search everywhere for the item, but only look for tools.
-            for _, service in ipairs(game:GetDescendants()) do
-                if service:IsA("Tool") then
-                    if service.Name == itemName then
-                        foundItem = service
-                        break
-                    end
-                end
-            end
-
-            if foundItem then
-                local clonedItem = foundItem:Clone()
-                clonedItem.Parent = backpack
-            else
-                print("Tool '" .. itemName .. "' not found.")
-            end
+        if foundTool then
+            local clonedTool = foundTool:Clone()
+            clonedTool.Parent = backpack
+            print("Given tool:", itemName, "to", player.Name) -- Debug print
+        else
+            print("Tool not found:", itemName) -- Debug print
         end
     end
-
-    local GiveGunsEvent = Instance.new("RemoteEvent")
-    GiveGunsEvent.Name = "GiveGuns"
-    GiveGunsEvent.Parent = game.ReplicatedStorage
-
-    GiveGunsEvent.OnServerEvent:Connect(function(player)
-        giveItems(player)
-    end)
 end
