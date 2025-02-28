@@ -2,6 +2,7 @@
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "GunGiverGUI"
 screenGui.Parent = game.Players.LocalPlayer.PlayerGui
+screenGui.ResetOnSpawn = false -- Important for mobile
 
 local mainFrame = Instance.new("Frame")
 mainFrame.Size = UDim2.new(0, 200, 0, 150)
@@ -61,5 +62,18 @@ local function giveItems()
     end
 end
 
--- Button click event
+-- Mobile Compatibility (using InputBegan)
+local function onInput(input, gameProcessedEvent)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        local object = input.UserInputObject
+        if object and object.Parent == gunsButton then
+            giveItems()
+        end
+    end
+end
+
+-- Connect InputBegan
+game:GetService("UserInputService").InputBegan:Connect(onInput)
+
+-- Connect MouseButton1Click (for desktop)
 gunsButton.MouseButton1Click:Connect(giveItems)
