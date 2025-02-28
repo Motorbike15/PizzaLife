@@ -3,6 +3,7 @@ local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "GunGiverGUI"
 screenGui.Parent = game.Players.LocalPlayer.PlayerGui
 screenGui.ResetOnSpawn = false -- Important for mobile
+screenGui.Enabled = true -- Make sure the GUI is enabled!
 
 local mainFrame = Instance.new("Frame")
 mainFrame.Size = UDim2.new(0, 200, 0, 150)
