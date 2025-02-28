@@ -1,0 +1,65 @@
+-- GUI Setup
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "GunGiverGUI"
+screenGui.Parent = game.Players.LocalPlayer.PlayerGui
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 200, 0, 150)
+mainFrame.Position = UDim2.new(0.5, -100, 0.5, -75)
+mainFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+mainFrame.BorderSizePixel = 0
+mainFrame.Parent = screenGui
+
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(1, 0, 0.2, 0)
+titleLabel.Position = UDim2.new(0, 0, 0, 0)
+titleLabel.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleLabel.Text = "Gun Giver"
+titleLabel.TextScaled = true
+titleLabel.Parent = mainFrame
+
+local gunsButton = Instance.new("TextButton")
+gunsButton.Size = UDim2.new(0.8, 0, 0.3, 0)
+gunsButton.Position = UDim2.new(0.1, 0, 0.3, 0)
+gunsButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+gunsButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+gunsButton.Text = "Guns"
+gunsButton.Parent = mainFrame
+
+local closeButton = Instance.new("TextButton")
+closeButton.Size = UDim2.new(0.2, 0, 0.2, 0)
+closeButton.Position = UDim2.new(0.8, 0, 0, 0)
+closeButton.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
+closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeButton.Text = "X"
+closeButton.Parent = mainFrame
+
+closeButton.MouseButton1Click:Connect(function()
+    screenGui:Destroy()
+end)
+
+-- Function to give items
+local function giveItems()
+    local items = {"Shotgun", "M9", "Keycard", "AK"}
+    local player = game.Players.LocalPlayer
+    local backpack = player.Backpack
+    local character = player.Character
+
+    if not character then
+        return
+    end
+
+    for _, itemName in ipairs(items) do
+        local item = game.ReplicatedStorage:FindFirstChild(itemName)
+        if item then
+            local clonedItem = item:Clone()
+            clonedItem.Parent = backpack
+        else
+            print("Item '" .. itemName .. "' not found in ReplicatedStorage.")
+        end
+    end
+end
+
+-- Button click event
+gunsButton.MouseButton1Click:Connect(giveItems)
