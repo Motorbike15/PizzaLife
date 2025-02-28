@@ -1,115 +1,139 @@
-if game:GetService("RunService"):IsClient() then
-    local screenGui = Instance.new("ScreenGui")
-    screenGui.Name = "ArrestGUI"
-    screenGui.Parent = game.Players.LocalPlayer.PlayerGui
-    screenGui.ResetOnSpawn = false
-    screenGui.Enabled = true
+-- Prison Life Admin Script
 
-    local mainFrame = Instance.new("Frame")
-    mainFrame.Size = UDim2.new(0, 0.3, 0, 150)
-    mainFrame.Position = UDim2.new(0.5, -mainFrame.Size.X.Offset / 2, 0.5, -mainFrame.Size.Y.Offset / 2)
-    mainFrame.BackgroundColor3 = Color3.new(1, 1, 1)
-    mainFrame.BackgroundTransparency = 0.5
-    mainFrame.BorderSizePixel = 0
-    mainFrame.Parent = screenGui
-    mainFrame.Draggable = true
-    mainFrame.ClipsDescendants = true
+local AdminCommands = {}
 
-    local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(0, 15)
-    UICorner.Parent = mainFrame
+-- Configuration (change these as needed)
+local AdminList = {"YourUsername1", "YourUsername2"} -- List of admin usernames
+local ArrestTime = 5 -- Time in seconds for the arrest animation
+local NukeDelay = 3 -- Delay in seconds before the nuke activates
+local NukeRadius = 100 -- Radius of the nuke explosion
+local NukeDamage = 1000 -- Damage dealt by the nuke
 
-    local playerTextBox = Instance.new("TextBox")
-    playerTextBox.Size = UDim2.new(0.8, 0, 0.3, 0)
-    playerTextBox.Position = UDim2.new(0.1, 0, 0.1, 0)
-    playerTextBox.PlaceholderText = "Player Name"
-    playerTextBox.Parent = mainFrame
-
-    local arrestButton = Instance.new("TextButton")
-    arrestButton.Size = UDim2.new(0.8, 0, 0.3, 0)
-    arrestButton.Position = UDim2.new(0.1, 0, 0.5, 0)
-    arrestButton.BackgroundColor3 = Color3.new(0.7, 0.7, 0.7)
-    arrestButton.Text = "Arrest 'Em"
-    arrestButton.Parent = mainFrame
-
-    local closeButton = Instance.new("TextButton")
-    closeButton.Size = UDim2.new(0.2, 0, 0.2, 0)
-    closeButton.Position = UDim2.new(0.8, 0, 0, 0)
-    closeButton.BackgroundColor3 = Color3.new(1, 0, 0)
-    closeButton.Text = "X"
-    closeButton.Parent = mainFrame
-
-    closeButton.MouseButton1Click:Connect(function()
-        screenGui:Destroy()
-    end)
-
-    arrestButton.MouseButton1Click:Connect(function()
-        local playerName = playerTextBox.Text
-        if playerName and playerName ~= "" then
-            game.ReplicatedStorage.ArrestPlayer:FireServer(playerName)
-        end
-    end)
-
-    -- Mobile dragging
-    local dragging = nil
-    local dragInput = nil
-    local dragStart = nil
-    local dragGuiStart = nil
-
-    mainFrame.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            dragInput = input
-            dragStart = input.Position
-            dragGuiStart = mainFrame.Position
-        end
-    end)
-
-    mainFrame.InputChanged:Connect(function(input)
-        if dragging and input == dragInput then
-            local delta = input.Position - dragStart
-            mainFrame.Position = UDim2.new(dragGuiStart.X.Scale, dragGuiStart.X.Offset + delta.X, dragGuiStart.Y.Scale, dragGuiStart.Y.Offset + delta.Y)
-        end
-    end)
-
-    mainFrame.InputEnded:Connect(function(input)
-        if dragging and input == dragInput then
-            dragging = false
-        end
-    end)
-
-else -- Server Side
-
-    local function arrestPlayer(playerName, arrestingPlayer)
-        local targetPlayer = game.Players:FindFirstChild(playerName)
-        if targetPlayer and targetPlayer.Character then
-            local targetCharacter = targetPlayer.Character
-            local arrestingCharacter = arrestingPlayer.Character
-
-            if arrestingCharacter and arrestingCharacter:FindFirstChild("HumanoidRootPart") and targetCharacter:FindFirstChild("HumanoidRootPart") then
-                arrestingCharacter.HumanoidRootPart.CFrame = targetCharacter.HumanoidRootPart.CFrame * CFrame.new(0, 2, 0) -- Teleport above target
-                
-                local handcuffs = game.ReplicatedStorage:FindFirstChild("Handcuffs")
-                if handcuffs then
-                    local clonedHandcuffs = handcuffs:Clone()
-                    clonedHandcuffs.Parent = targetPlayer.Backpack
-                    clonedHandcuffs.Parent = targetCharacter
-                else
-                    warn("Handcuffs tool not found in ReplicatedStorage")
-                end
-            else
-                warn("Arresting or target player character not fully loaded.")
-            end
-        else
-            warn("Player not found: ", playerName)
-        end
+local function isAdmin(playerName)
+  for _, admin in ipairs(AdminList) do
+    if string.lower(playerName) == string.lower(admin) then
+      return true
     end
-
-    local ArrestPlayerEvent = Instance.new("RemoteEvent")
-    ArrestPlayerEvent.Name = "ArrestPlayer"
-    ArrestPlayerEvent.Parent = game.ReplicatedStorage
-
-    ArrestPlayerEvent.OnServerEvent:Connect(function(player, playerName)
-        arrestPlayer(playerName, player)
-    end)
+  end
+  return false
 end
+
+local function findPlayer(playerName)
+  for _, player in ipairs(game.Players:GetPlayers()) do
+    if string.lower(player.Name) == string.lower(playerName) then
+      return player
+    end
+  end
+  return nil
+end
+
+local function arrestPlayer(admin, target)
+  if not target then
+    admin:Chat("Player not found.")
+    return
+  end
+
+  local adminCharacter = admin.Character
+  local targetCharacter = target.Character
+
+  if not adminCharacter or not targetCharacter then
+    admin:Chat("Characters not loaded.")
+    return
+  end
+
+  local adminPosition = adminCharacter.HumanoidRootPart.CFrame
+  local targetPosition = targetCharacter.HumanoidRootPart.CFrame
+
+  adminCharacter.HumanoidRootPart.CFrame = targetPosition * CFrame.new(0, 0, 5) -- Teleport behind target
+
+  local handcuffs = Instance.new("ObjectValue")
+  handcuffs.Name = "Handcuffs"
+  handcuffs.Value = admin
+  handcuffs.Parent = targetCharacter
+
+  local arrestAnimation = targetCharacter.Humanoid:LoadAnimation(Instance.new("Animation")) -- Replace with actual arrest animation if you have one.
+  arrestAnimation:Play()
+
+  wait(ArrestTime)
+
+  arrestAnimation:Stop()
+
+  adminCharacter.HumanoidRootPart.CFrame = adminPosition -- Teleport back
+
+  admin:Chat(target.Name .. " arrested.")
+end
+
+local function nuke(admin)
+  admin:Chat("Nuke initiated. Detonation in " .. NukeDelay .. " seconds.")
+  wait(NukeDelay)
+
+  local nukePart = Instance.new("Part")
+  nukePart.Anchored = true
+  nukePart.CanCollide = false
+  nukePart.Size = Vector3.new(1, 1, 1)
+  nukePart.Position = admin.Character.HumanoidRootPart.Position
+  nukePart.Parent = workspace
+  nukePart.Transparency = 0.5
+  nukePart.Shape = Enum.PartType.Ball
+  nukePart.BrickColor = BrickColor.new("Really red")
+
+  local explosion = Instance.new("Explosion")
+  explosion.Position = nukePart.Position
+  explosion.BlastRadius = NukeRadius
+  explosion.BlastPressure = 0
+  explosion.Parent = nukePart
+
+  game:GetService("Debris"):AddItem(nukePart, 0.1)
+
+  for _, player in ipairs(game.Players:GetPlayers()) do
+    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+      local distance = (player.Character.HumanoidRootPart.Position - nukePart.Position).Magnitude
+      if distance <= NukeRadius then
+        player.Character.Humanoid:TakeDamage(NukeDamage)
+      end
+    end
+  end
+
+  admin:Chat("Nuke detonated.")
+end
+
+game.Players.PlayerAdded:Connect(function(player)
+  player.Chatted:Connect(function(message)
+    if not isAdmin(player.Name) then return end
+
+    local parts = string.split(message, " ")
+    local command = parts[1]
+    local targetName = parts[2]
+
+    if command == "/arrest" then
+      local target = findPlayer(targetName)
+      arrestPlayer(player, target)
+    elseif command == "/nuke" then
+      nuke(player)
+    elseif command == "/tp" then --Teleport to player command
+      local target = findPlayer(targetName)
+      if target and target.Character and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and target.Character:FindFirstChild("HumanoidRootPart") then
+        player.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame
+        player:Chat("Teleported to " .. target.Name)
+      else
+        player:Chat("Player not found, or character not loaded.")
+      end
+    elseif command == "/kill" then --Kill player command
+      local target = findPlayer(targetName)
+      if target and target.Character and target.Character:FindFirstChild("Humanoid") then
+        target.Character.Humanoid.Health = 0
+        player:Chat(target.Name .. " killed.")
+      else
+        player:Chat("Player not found, or character not loaded.")
+      end
+    elseif command == "/heal" then --Heal player command
+      local target = findPlayer(targetName)
+      if target and target.Character and target.Character:FindFirstChild("Humanoid") then
+        target.Character.Humanoid.Health = target.Character.Humanoid.MaxHealth
+        player:Chat(target.Name .. " healed.")
+      else
+        player:Chat("Player not found, or character not loaded.")
+      end
+    end
+  end)
+end)
