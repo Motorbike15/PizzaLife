@@ -1,139 +1,92 @@
--- Prison Life Admin Script
+-- Fancy GUI Creation
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "PizzaLifeWeaponGrabber"
+ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
-local AdminCommands = {}
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 300, 0, 150)
+MainFrame.Position = UDim2.new(0.5, -150, 0.5, -75)
+MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+MainFrame.BorderSizePixel = 0
+MainFrame.Parent = ScreenGui
 
--- Configuration (change these as needed)
-local AdminList = {"YourUsername1", "YourUsername2"} -- List of admin usernames
-local ArrestTime = 5 -- Time in seconds for the arrest animation
-local NukeDelay = 3 -- Delay in seconds before the nuke activates
-local NukeRadius = 100 -- Radius of the nuke explosion
-local NukeDamage = 1000 -- Damage dealt by the nuke
+local TitleLabel = Instance.new("TextLabel")
+TitleLabel.Size = UDim2.new(1, 0, 0.3, 0)
+TitleLabel.Position = UDim2.new(0, 0, 0, 0)
+TitleLabel.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+TitleLabel.BorderSizePixel = 0
+TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleLabel.TextScaled = true
+TitleLabel.Text = "Weapon Grabber"
+TitleLabel.Parent = MainFrame
 
-local function isAdmin(playerName)
-  for _, admin in ipairs(AdminList) do
-    if string.lower(playerName) == string.lower(admin) then
-      return true
-    end
-  end
-  return false
+local GrabButton = Instance.new("TextButton")
+GrabButton.Size = UDim2.new(0.8, 0, 0.4, 0)
+GrabButton.Position = UDim2.new(0.1, 0, 0.4, 0)
+GrabButton.BackgroundColor3 = Color3.fromRGB(50, 150, 255)
+GrabButton.BorderSizePixel = 0
+GrabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+GrabButton.TextScaled = true
+GrabButton.Text = "Grab Weapons"
+GrabButton.Parent = MainFrame
+
+-- Animations
+local function animateButton(button)
+    local originalColor = button.BackgroundColor3
+    local hoverColor = originalColor:Lerp(Color3.new(1, 1, 1), 0.2)
+    local tweenInfo = TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+
+    button.MouseEnter:Connect(function()
+        TweenService:Create(button, tweenInfo, {BackgroundColor3 = hoverColor}):Play()
+    end)
+
+    button.MouseLeave:Connect(function()
+        TweenService:Create(button, tweenInfo, {BackgroundColor3 = originalColor}):Play()
+    end)
 end
 
-local function findPlayer(playerName)
-  for _, player in ipairs(game.Players:GetPlayers()) do
-    if string.lower(player.Name) == string.lower(playerName) then
-      return player
+animateButton(GrabButton)
+
+-- Weapon Grabber Logic
+local function grabWeapons()
+    local HttpService = game:GetService("HttpService")
+    local url = "https://raw.githubusercontent.com/Motorbike15/PizzaLife/main/Prison_Items"
+
+    local success, content = pcall(function()
+        return HttpService:GetAsync(url)
+    end)
+
+    if success then
+        local weaponNames = {}
+        for line in content:gmatch("[^\r\n]+") do
+            if line:match("^local weapon = ") then
+                local weaponName = line:match('"([^"]+)"')
+                if weaponName then
+                    table.insert(weaponNames, weaponName)
+                end
+            end
+        end
+
+        for _, weaponName in ipairs(weaponNames) do
+            local weapon = game.ReplicatedStorage:FindFirstChild(weaponName)
+            if weapon then
+                local clonedWeapon = weapon:Clone()
+                clonedWeapon.Parent = game.Players.LocalPlayer.Character
+            else
+                print("Weapon not found in ReplicatedStorage:", weaponName)
+            end
+        end
+    else
+        warn("Failed to retrieve weapon list:", content)
     end
-  end
-  return nil
 end
 
-local function arrestPlayer(admin, target)
-  if not target then
-    admin:Chat("Player not found.")
-    return
-  end
+-- Button Click Event
+GrabButton.MouseButton1Click:Connect(grabWeapons)
 
-  local adminCharacter = admin.Character
-  local targetCharacter = target.Character
-
-  if not adminCharacter or not targetCharacter then
-    admin:Chat("Characters not loaded.")
-    return
-  end
-
-  local adminPosition = adminCharacter.HumanoidRootPart.CFrame
-  local targetPosition = targetCharacter.HumanoidRootPart.CFrame
-
-  adminCharacter.HumanoidRootPart.CFrame = targetPosition * CFrame.new(0, 0, 5) -- Teleport behind target
-
-  local handcuffs = Instance.new("ObjectValue")
-  handcuffs.Name = "Handcuffs"
-  handcuffs.Value = admin
-  handcuffs.Parent = targetCharacter
-
-  local arrestAnimation = targetCharacter.Humanoid:LoadAnimation(Instance.new("Animation")) -- Replace with actual arrest animation if you have one.
-  arrestAnimation:Play()
-
-  wait(ArrestTime)
-
-  arrestAnimation:Stop()
-
-  adminCharacter.HumanoidRootPart.CFrame = adminPosition -- Teleport back
-
-  admin:Chat(target.Name .. " arrested.")
-end
-
-local function nuke(admin)
-  admin:Chat("Nuke initiated. Detonation in " .. NukeDelay .. " seconds.")
-  wait(NukeDelay)
-
-  local nukePart = Instance.new("Part")
-  nukePart.Anchored = true
-  nukePart.CanCollide = false
-  nukePart.Size = Vector3.new(1, 1, 1)
-  nukePart.Position = admin.Character.HumanoidRootPart.Position
-  nukePart.Parent = workspace
-  nukePart.Transparency = 0.5
-  nukePart.Shape = Enum.PartType.Ball
-  nukePart.BrickColor = BrickColor.new("Really red")
-
-  local explosion = Instance.new("Explosion")
-  explosion.Position = nukePart.Position
-  explosion.BlastRadius = NukeRadius
-  explosion.BlastPressure = 0
-  explosion.Parent = nukePart
-
-  game:GetService("Debris"):AddItem(nukePart, 0.1)
-
-  for _, player in ipairs(game.Players:GetPlayers()) do
-    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-      local distance = (player.Character.HumanoidRootPart.Position - nukePart.Position).Magnitude
-      if distance <= NukeRadius then
-        player.Character.Humanoid:TakeDamage(NukeDamage)
-      end
-    end
-  end
-
-  admin:Chat("Nuke detonated.")
-end
-
-game.Players.PlayerAdded:Connect(function(player)
-  player.Chatted:Connect(function(message)
-    if not isAdmin(player.Name) then return end
-
-    local parts = string.split(message, " ")
-    local command = parts[1]
-    local targetName = parts[2]
-
-    if command == "/arrest" then
-      local target = findPlayer(targetName)
-      arrestPlayer(player, target)
-    elseif command == "/nuke" then
-      nuke(player)
-    elseif command == "/tp" then --Teleport to player command
-      local target = findPlayer(targetName)
-      if target and target.Character and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and target.Character:FindFirstChild("HumanoidRootPart") then
-        player.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame
-        player:Chat("Teleported to " .. target.Name)
-      else
-        player:Chat("Player not found, or character not loaded.")
-      end
-    elseif command == "/kill" then --Kill player command
-      local target = findPlayer(targetName)
-      if target and target.Character and target.Character:FindFirstChild("Humanoid") then
-        target.Character.Humanoid.Health = 0
-        player:Chat(target.Name .. " killed.")
-      else
-        player:Chat("Player not found, or character not loaded.")
-      end
-    elseif command == "/heal" then --Heal player command
-      local target = findPlayer(targetName)
-      if target and target.Character and target.Character:FindFirstChild("Humanoid") then
-        target.Character.Humanoid.Health = target.Character.Humanoid.MaxHealth
-        player:Chat(target.Name .. " healed.")
-      else
-        player:Chat("Player not found, or character not loaded.")
-      end
-    end
-  end)
-end)
+-- Loadstring (Example - use with caution!)
+-- Note: Loadstring should be used responsibly and only from trusted sources.
+-- Example:
+-- local exampleCode = "print('Hello from Loadstring!')"
+-- loadstring(exampleCode)()
+-- DO NOT use loadstring with untrusted code.
