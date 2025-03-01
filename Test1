@@ -9,6 +9,7 @@ MainFrame.Position = UDim2.new(0.5, -150, 0.5, -75)
 MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 MainFrame.BorderSizePixel = 0
 MainFrame.Parent = ScreenGui
+MainFrame.Draggable = true -- Make the GUI draggable
 
 local TitleLabel = Instance.new("TextLabel")
 TitleLabel.Size = UDim2.new(1, 0, 0.3, 0)
@@ -84,9 +85,29 @@ end
 -- Button Click Event
 GrabButton.MouseButton1Click:Connect(grabWeapons)
 
--- Loadstring (Example - use with caution!)
--- Note: Loadstring should be used responsibly and only from trusted sources.
--- Example:
--- local exampleCode = "print('Hello from Loadstring!')"
--- loadstring(exampleCode)()
--- DO NOT use loadstring with untrusted code.
+-- Loadstring Replacement
+local function runFromGithub(url)
+    local HttpService = game:GetService("HttpService")
+    local success, content = pcall(function()
+        return HttpService:GetAsync(url)
+    end)
+
+    if success then
+        local loadstringSuccess, loadstringResult = pcall(function()
+            loadstring(content)()
+        end)
+        if not loadstringSuccess then
+            warn("Loadstring failed: ", loadstringResult)
+        end
+    else
+        warn("Failed to retrieve script from GitHub: ", content)
+    end
+end
+
+-- Example of calling the loadstring replacement with your desired url.
+-- Please be extremely careful when using loadstring.
+-- This example is commented out. Remove the comment to use.
+
+-- runFromGithub("https://raw.githubusercontent.com/Motorbike15/PizzaLife/main/Test1")
+
+-- End of Loadstring Replacement.
