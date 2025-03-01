@@ -60,11 +60,9 @@ local function grabWeapons()
     if success then
         local weaponNames = {}
         for line in content:gmatch("[^\r\n]+") do
-            if line:match("^local weapon = ") then
-                local weaponName = line:match('"([^"]+)"')
-                if weaponName then
-                    table.insert(weaponNames, weaponName)
-                end
+            local weaponName = line:match('["\']([^"\'%s]+)["\']') -- Improved regex
+            if weaponName then
+                table.insert(weaponNames, weaponName)
             end
         end
 
