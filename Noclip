@@ -1,37 +1,61 @@
-local userInputService = game:GetService("UserInputService")
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoid = character:WaitForChild("Humanoid")
 local rootPart = character:WaitForChild("HumanoidRootPart")
+local noclipEnabled = false
 
-local throughWalls = false
+local function toggleNoclip()
+    noclipEnabled = not noclipEnabled
 
-local function toggleThroughWalls()
-  throughWalls = not throughWalls
-  if throughWalls then
-    rootPart.CanCollide = false
-    humanoid.WalkSpeed = humanoid.WalkSpeed * 1.5 -- Optional: Increase speed for better effect
-    print("Through walls enabled!")
-  else
-    rootPart.CanCollide = true
-    humanoid.WalkSpeed = humanoid.WalkSpeed / 1.5 -- Optional: Revert speed
-    print("Through walls disabled!")
-  end
+    if noclipEnabled then
+        for _, part in ipairs(character:GetDescendants()) do
+            if part:IsA("BasePart") and part ~= rootPart then
+                part.CanCollide = false
+            end
+        end
+        humanoid.WalkSpeed = 50
+        humanoid.JumpPower = 0
+    else
+        for _, part in ipairs(character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = true
+            end
+        end
+        humanoid.WalkSpeed = 16
+        humanoid.JumpPower = 50
+    end
 end
 
+local userInputService = game:GetService("UserInputService")
 userInputService.InputBegan:Connect(function(input, gameProcessedEvent)
-  if gameProcessedEvent then return end
-  if input.KeyCode == Enum.KeyCode.T then
-    toggleThroughWalls()
-  end
-end)
-
--- Optional: Handle character respawn
-player.CharacterAdded:Connect(function(newCharacter)
-    character = newCharacter
-    humanoid = character:WaitForChild("Humanoid")
-    rootPart = character:WaitForChild("HumanoidRootPart")
-    if throughWalls then
-        rootPart.CanCollide = false --re-enable if character respawns while through walls is active.
+    if input.KeyCode == Enum.KeyCode.T and not gameProcessedEvent then
+        toggleNoclip()
     end
 end)
+
+local function noclipMovement()
+    if noclipEnabled then
+        local moveDirection = Vector3.new(0, 0, 0)
+        if userInputService:IsKeyDown(Enum.KeyCode.W) then
+            moveDirection = moveDirection + rootPart.CFrame.LookVector
+        end
+        if userInputService:IsKeyDown(Enum.KeyCode.S) then
+            moveDirection = moveDirection - rootPart.CFrame.LookVector
+        end
+        if userInputService:IsKeyDown(Enum.KeyCode.A) then
+            moveDirection = moveDirection - rootPart.CFrame.RightVector
+        end
+        if userInputService:IsKeyDown(Enum.KeyCode.D) then
+            moveDirection = moveDirection + rootPart.CFrame.RightVector
+        end
+        if userInputService:IsKeyDown(Enum.KeyCode.Space) then
+            moveDirection = moveDirection + Vector3.new(0, 1, 0)
+        end
+        if userInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
+            moveDirection = moveDirection - Vector3.new(0, 1, 0)
+        end
+        rootPart.CFrame = rootPart.CFrame + moveDirection.Unit * 10
+    end
+end
+
+game:GetService("RunService").Heartbeat:Connect(noclipMovement)
