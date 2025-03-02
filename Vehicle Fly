@@ -1,63 +1,49 @@
-local UserInputService = game:GetService("UserInputService")
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-
-local localPlayer = Players.LocalPlayer
-local character = localPlayer.Character or localPlayer.CharacterAdded:Wait()
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
 local humanoid = character:WaitForChild("Humanoid")
-local rootPart = character:WaitForChild("HumanoidRootPart")
+local vehicle = script.Parent
 
 local flying = false
-local flySpeed = 20 -- Adjust as needed
+local speed = 50
 
-local function toggleFly()
-    flying = not flying
-    if flying then
-        humanoid.PlatformStand = true
-        rootPart.Anchored = true
-    else
-        humanoid.PlatformStand = false
-        rootPart.Anchored = false
+local function fly()
+    flying = true
+    humanoid.Sit = true
+    while flying do
+        local direction = Vector3.new(0, 0, 0)
+        if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.W) then
+            direction = direction + vehicle.CFrame.LookVector
+        end
+        if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.S) then
+            direction = direction - vehicle.CFrame.LookVector
+        end
+        if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.A) then
+            direction = direction - vehicle.CFrame.RightVector
+        end
+        if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.D) then
+            direction = direction + vehicle.CFrame.RightVector
+        end
+        if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.Space) then
+            vehicle.Position = vehicle.Position + Vector3.new(0, speed, 0)
+        end
+        if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.LeftControl) then
+            vehicle.Position = vehicle.Position - Vector3.new(0, speed, 0)
+        end
+        vehicle.Position = vehicle.Position + (direction.Unit * speed * game:GetService("RunService").Heartbeat:Wait())
     end
 end
 
-UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
-    if input.KeyCode == Enum.KeyCode.T and not gameProcessedEvent then
-        toggleFly()
-    end
-end)
+local function stopFlying()
+    flying = false
+    humanoid.Sit = false
+end
 
-RunService.Heartbeat:Connect(function()
-    if flying then
-        local direction = Vector3.new(0, 0, 0)
-        if UserInputService:IsKeyDown(Enum.KeyCode.W) then
-            direction = direction + rootPart.CFrame.LookVector
+game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessedEvent)
+    if not gameProcessedEvent and input.KeyCode == Enum.KeyCode.F then
+        if flying then
+            stopFlying()
+        else
+            fly()
         end
-        if UserInputService:IsKeyDown(Enum.KeyCode.S) then
-            direction = direction - rootPart.CFrame.LookVector
-        end
-        if UserInputService:IsKeyDown(Enum.KeyCode.A) then
-            direction = direction - rootPart.CFrame.RightVector
-        end
-        if UserInputService:IsKeyDown(Enum.KeyCode.D) then
-            direction = direction + rootPart.CFrame.RightVector
-        end
-        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
-            direction = direction + Vector3.new(0, 1, 0)
-        end
-        if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
-            direction = direction - Vector3.new(0, 1, 0)
-        end
-
-        rootPart.Velocity = direction.Unit * flySpeed
-    end
-end)
-
-localPlayer.CharacterAdded:Connect(function(newCharacter)
-    character = newCharacter
-    humanoid = character:WaitForChild("Humanoid")
-    rootPart = character:WaitForChild("HumanoidRootPart")
-    if flying then
-        toggleFly() -- Reapply if player respawns while flying is active
     end
 end)
