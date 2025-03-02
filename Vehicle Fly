@@ -1,0 +1,77 @@
+local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local function flyVehicle()
+    local vehicle = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildWhichIsA("VehicleSeat")
+    if vehicle then
+        local vehicleBody = vehicle:FindFirstAncestorWhichIsA("Model")
+        if vehicleBody then
+            local bodyGyro = Instance.new("BodyGyro")
+            bodyGyro.Parent = vehicleBody.PrimaryPart
+            bodyGyro.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+            bodyGyro.CFrame = vehicleBody.PrimaryPart.CFrame
+
+            local bodyVelocity = Instance.new("BodyVelocity")
+            bodyVelocity.Parent = vehicleBody.PrimaryPart
+            bodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+            bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+
+            local function onInput(input, processed)
+                if processed then
+                    return
+                end
+
+                if input.KeyCode == Enum.KeyCode.W then
+                    bodyVelocity.Velocity = vehicleBody.PrimaryPart.CFrame.LookVector * 100 -- Forward
+                elseif input.KeyCode == Enum.KeyCode.S then
+                    bodyVelocity.Velocity = -vehicleBody.PrimaryPart.CFrame.LookVector * 100 -- Backward
+                elseif input.KeyCode == Enum.KeyCode.A then
+                    bodyVelocity.Velocity = -vehicleBody.PrimaryPart.CFrame.RightVector * 100 -- Left
+                elseif input.KeyCode == Enum.KeyCode.D then
+                    bodyVelocity.Velocity = vehicleBody.PrimaryPart.CFrame.RightVector * 100 -- Right
+                elseif input.KeyCode == Enum.KeyCode.E then
+                    bodyVelocity.Velocity = Vector3.new(0, 100, 0) -- Up
+                elseif input.KeyCode == Enum.KeyCode.Q then
+                    bodyVelocity.Velocity = Vector3.new(0, -100, 0) -- Down
+                elseif input.KeyCode == Enum.KeyCode.LeftShift then
+                    bodyVelocity.Velocity = vehicleBody.PrimaryPart.CFrame.LookVector * 200 -- Faster forward
+                end
+            end
+
+            UserInputService.InputBegan:Connect(onInput)
+            UserInputService.InputEnded:Connect(function(input, processed)
+                if processed then
+                    return
+                end
+
+                if input.KeyCode == Enum.KeyCode.W or input.KeyCode == Enum.KeyCode.S or
+                   input.KeyCode == Enum.KeyCode.A or input.KeyCode == Enum.KeyCode.D or
+                   input.KeyCode == Enum.KeyCode.E or input.KeyCode == Enum.KeyCode.Q or
+                   input.KeyCode == Enum.KeyCode.LeftShift then
+                    bodyVelocity.Velocity = Vector3.new(0, 0, 0) -- Stop
+                end
+            end)
+
+            local function onCharacterDescendantRemoving(descendant)
+                if descendant == vehicle then
+                    bodyGyro:Destroy()
+                    bodyVelocity:Destroy()
+                    UserInputService.InputBegan:Disconnect(onInput)
+                end
+            end
+
+            LocalPlayer.Character.DescendantRemoving:Connect(onCharacterDescendantRemoving)
+        end
+    end
+end
+
+LocalPlayer.CharacterAdded:Connect(function(character)
+    character.ChildAdded:Connect(function(child)
+        if child:IsA("VehicleSeat") then
+            flyVehicle()
+        end
+    end)
+end)
+
+flyVehicle() -- Call initially in case player is already in a vehicle
