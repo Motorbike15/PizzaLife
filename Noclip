@@ -1,103 +1,61 @@
-local NoclipEnabled = false
-local Player = game:GetService("Players").LocalPlayer
-local Character = Player.Character or Player.CharacterAdded:Wait()
-local Humanoid = Character:WaitForChild("Humanoid")
-local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local rootPart = character:WaitForChild("HumanoidRootPart")
 
-local OriginalWalkSpeed = Humanoid.WalkSpeed
-local NoclipSpeed = OriginalWalkSpeed * 2 -- Adjust as needed
+local noclipEnabled = false
+local originalWalkSpeed = humanoid.WalkSpeed
+local originalJumpPower = humanoid.JumpPower
 
--- Function to enable/disable noclip
-local function ToggleNoclip()
-    NoclipEnabled = not NoclipEnabled
+local function toggleNoclip()
+    noclipEnabled = not noclipEnabled
 
-    if NoclipEnabled then
-        -- Disable collisions for all character parts EXCEPT HumanoidRootPart
-        for _, part in pairs(Character:GetDescendants()) do
-            if part:IsA("BasePart") and part ~= HumanoidRootPart then
-                part.CanCollide = false
-            end
-        end
-        -- Set PlatformStand to prevent weird walking animation
-        Humanoid.PlatformStand = true
-        -- Increase walk speed for noclip
-        Humanoid.WalkSpeed = NoclipSpeed
-        -- Disable gravity
-        Humanoid.UseJumpPower = true
-        Humanoid.JumpPower = 0
-        Humanoid.AutoRotate = false
-
-        -- Apply a bodyvelocity to allow for vertical movement
-        local bodyVelocity = Instance.new("BodyVelocity")
-        bodyVelocity.Parent = HumanoidRootPart
-        bodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-        bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-
-        -- Function to update velocity based on input
-        local function updateVelocity()
-            if not NoclipEnabled then return end
-
-            local direction = Vector3.new(0, 0, 0)
-            local userInputService = game:GetService("UserInputService")
-
-            if userInputService:IsKeyDown(Enum.KeyCode.W) then
-                direction = direction + HumanoidRootPart.CFrame.LookVector
-            end
-            if userInputService:IsKeyDown(Enum.KeyCode.S) then
-                direction = direction - HumanoidRootPart.CFrame.LookVector
-            end
-            if userInputService:IsKeyDown(Enum.KeyCode.A) then
-                direction = direction - HumanoidRootPart.CFrame.RightVector
-            end
-            if userInputService:IsKeyDown(Enum.KeyCode.D) then
-                direction = direction + HumanoidRootPart.CFrame.RightVector
-            end
-            if userInputService:IsKeyDown(Enum.KeyCode.Space) then
-                direction = direction + Vector3.new(0, 1, 0)
-            end
-            if userInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
-                direction = direction - Vector3.new(0, 1, 0)
-            end
-
-            bodyVelocity.Velocity = direction * NoclipSpeed
-        end
-
-        -- Connect the update function to RenderStepped
-        local connection = game:GetService("RunService").RenderStepped:Connect(updateVelocity)
-
-        -- Store the connection so we can disconnect it later
-        Character.NoclipConnection = connection
-        Character.NoclipBodyVelocity = bodyVelocity
-
+    if noclipEnabled then
+        humanoid.WalkSpeed = 0 -- Disable normal walking
+        humanoid.JumpPower = 0 -- Disable jumping
+        rootPart.CanCollide = false -- Disable collision
+        print("Noclip Enabled")
     else
-        -- Re-enable collisions and reset PlatformStand
-        for _, part in pairs(Character:GetDescendants()) do
-            if part:IsA("BasePart") and part ~= HumanoidRootPart then
-                part.CanCollide = true
-            end
-        end
-        Humanoid.PlatformStand = false
-        Humanoid.WalkSpeed = OriginalWalkSpeed
-        Humanoid.UseJumpPower = false
-        Humanoid.AutoRotate = true
-
-        -- Disconnect the RenderStepped connection
-        if Character.NoclipConnection then
-            Character.NoclipConnection:Disconnect()
-            Character.NoclipConnection = nil
-        end
-
-        -- Remove the body velocity
-        if Character.NoclipBodyVelocity then
-            Character.NoclipBodyVelocity:Destroy()
-            Character.NoclipBodyVelocity = nil
-        end
+        humanoid.WalkSpeed = originalWalkSpeed -- Restore original speed
+        humanoid.JumpPower = originalJumpPower -- Restore original jump power
+        rootPart.CanCollide = true -- Enable collision
+        print("Noclip Disabled")
     end
 end
 
--- Keybind for Noclip
-game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
-    if input.KeyCode == Enum.KeyCode.E and not gameProcessed then
-        ToggleNoclip()
+local function moveWithNoclip(deltaTime)
+    if noclipEnabled then
+        local camera = workspace.CurrentCamera
+        local moveDirection = Vector3.new(0, 0, 0)
+        local speed = 50 -- Adjust speed as needed
+
+        if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.W) then
+            moveDirection = moveDirection + camera.CFrame.LookVector
+        end
+        if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.S) then
+            moveDirection = moveDirection - camera.CFrame.LookVector
+        end
+        if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.A) then
+            moveDirection = moveDirection - camera.CFrame.RightVector
+        end
+        if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.D) then
+            moveDirection = moveDirection + camera.CFrame.RightVector
+        end
+        if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.Space) then
+            moveDirection = moveDirection + Vector3.new(0, 1, 0)
+        end
+        if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.LeftShift) then
+            moveDirection = moveDirection - Vector3.new(0, 1, 0)
+        end
+
+        rootPart.CFrame = rootPart.CFrame + moveDirection.Unit * speed * deltaTime
+    end
+end
+
+game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessedEvent)
+    if input.KeyCode == Enum.KeyCode.E and not gameProcessedEvent then
+        toggleNoclip()
     end
 end)
+
+game:GetService("RunService").Heartbeat:Connect(moveWithNoclip)
