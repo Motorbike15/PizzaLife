@@ -58,6 +58,6 @@ localPlayer.CharacterAdded:Connect(function(newCharacter)
     humanoid = character:WaitForChild("Humanoid")
     rootPart = character:WaitForChild("HumanoidRootPart")
     if flying then
-        toggleFly() --Reapply if player respawns while flying is active.
+        toggleFly() -- Reapply if player respawns while flying is active
     end
 end)
