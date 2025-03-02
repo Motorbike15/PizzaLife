@@ -1,0 +1,20 @@
+-- ServerScript (in ServerScriptService)
+
+local remoteEvent = game.ReplicatedStorage:WaitForChild("TeleportEvent") -- Create a RemoteEvent in ReplicatedStorage
+local locations = {
+    Yard = Vector3.new(807.47, 98.00, 2460.97),
+    CriminalBase1 = Vector3.new(-939.85, 94.13, 2066.88),
+    Gate = Vector3.new(658.02, 95.49, 2354.81),
+    Cafeteria = Vector3.new(921.09, 99.99, 2292.90)
+}
+
+remoteEvent.OnServerEvent:Connect(function(player, locationName)
+    if locations[locationName] and player.Character then
+        local humanoidRootPart = player.Character:FindFirstChild("HumanoidRootPart")
+        if humanoidRootPart then
+            local targetPosition = locations[locationName]
+            humanoidRootPart.CFrame = CFrame.new(targetPosition)
+            print(player.Name .. " teleported to " .. locationName)
+        end
+    end
+end)
