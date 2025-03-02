@@ -1,54 +1,18 @@
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
 local rootPart = character:WaitForChild("HumanoidRootPart")
 
 local noclipEnabled = false
-local originalWalkSpeed = humanoid.WalkSpeed
-local originalJumpPower = humanoid.JumpPower
 
 local function toggleNoclip()
     noclipEnabled = not noclipEnabled
-
-    if noclipEnabled then
-        humanoid.WalkSpeed = 0 -- Disable normal walking
-        humanoid.JumpPower = 0 -- Disable jumping
-        rootPart.CanCollide = false -- Disable collision
-        print("Noclip Enabled")
-    else
-        humanoid.WalkSpeed = originalWalkSpeed -- Restore original speed
-        humanoid.JumpPower = originalJumpPower -- Restore original jump power
-        rootPart.CanCollide = true -- Enable collision
-        print("Noclip Disabled")
-    end
+    rootPart.CanCollide = not noclipEnabled -- Simplified collision toggle
+    print("Noclip toggled:", noclipEnabled)
 end
 
-local function moveWithNoclip(deltaTime)
+local function moveForward()
     if noclipEnabled then
-        local camera = workspace.CurrentCamera
-        local moveDirection = Vector3.new(0, 0, 0)
-        local speed = 50 -- Adjust speed as needed
-
-        if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.W) then
-            moveDirection = moveDirection + camera.CFrame.LookVector
-        end
-        if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.S) then
-            moveDirection = moveDirection - camera.CFrame.LookVector
-        end
-        if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.A) then
-            moveDirection = moveDirection - camera.CFrame.RightVector
-        end
-        if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.D) then
-            moveDirection = moveDirection + camera.CFrame.RightVector
-        end
-        if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.Space) then
-            moveDirection = moveDirection + Vector3.new(0, 1, 0)
-        end
-        if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.LeftShift) then
-            moveDirection = moveDirection - Vector3.new(0, 1, 0)
-        end
-
-        rootPart.CFrame = rootPart.CFrame + moveDirection.Unit * speed * deltaTime
+        rootPart.CFrame = rootPart.CFrame * CFrame.new(0, 0, -5) -- Move 5 studs forward
     end
 end
 
@@ -56,6 +20,7 @@ game:GetService("UserInputService").InputBegan:Connect(function(input, gameProce
     if input.KeyCode == Enum.KeyCode.E and not gameProcessedEvent then
         toggleNoclip()
     end
+    if input.KeyCode == Enum.KeyCode.W and not gameProcessedEvent then
+        moveForward()
+    end
 end)
-
-game:GetService("RunService").Heartbeat:Connect(moveWithNoclip)
