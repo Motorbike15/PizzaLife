@@ -1,68 +1,59 @@
-local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local rootPart = character:WaitForChild("HumanoidRootPart")
+local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
+local PhysicsService = game:GetService("PhysicsService")
+
+local localPlayer = Players.LocalPlayer
+local character = localPlayer.Character or localPlayer.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
 
 local noclipEnabled = false
-local noclipSpeed = 5 -- Speed of movement in studs
+local noclipCollisionGroupName = "NoclipPlayers"
+
+PhysicsService:CreateCollisionGroup(noclipCollisionGroupName)
+PhysicsService:CollisionGroupSetCollidable(noclipCollisionGroupName, "Default", false)
 
 local function toggleNoclip()
     noclipEnabled = not noclipEnabled
-    rootPart.CanCollide = not noclipEnabled
-    print("Noclip toggled:", noclipEnabled)
-end
 
-local function moveForward()
     if noclipEnabled then
-        rootPart.CFrame = rootPart.CFrame * rootPart.CFrame.LookVector * noclipSpeed
+        for _, part in ipairs(character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                PhysicsService:SetPartCollisionGroup(part, noclipCollisionGroupName)
+            end
+        end
+        humanoid:SetState(Enum.HumanoidStateType.Physics)
+        -- Optional: Visual feedback
+        for _, part in ipairs(character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.Transparency = 0.5
+            end
+        end
+    else
+        for _, part in ipairs(character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                PhysicsService:SetPartCollisionGroup(part, "Default")
+            end
+        end
+        humanoid:SetState(Enum.HumanoidStateType.Running)
+        -- Optional: Revert visual feedback
+        for _, part in ipairs(character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.Transparency = 0
+            end
+        end
     end
 end
 
-local function moveBackward()
-    if noclipEnabled then
-        rootPart.CFrame = rootPart.CFrame * -rootPart.CFrame.LookVector * noclipSpeed
-    end
-end
-
-local function moveLeft()
-    if noclipEnabled then
-         rootPart.CFrame = rootPart.CFrame * -rootPart.CFrame.RightVector * noclipSpeed
-    end
-end
-
-local function moveRight()
-    if noclipEnabled then
-        rootPart.CFrame = rootPart.CFrame * rootPart.CFrame.RightVector * noclipSpeed
-    end
-end
-
-local function moveUp()
-    if noclipEnabled then
-        rootPart.CFrame = rootPart.CFrame * Vector3.new(0, noclipSpeed, 0)
-    end
-end
-
-local function moveDown()
-    if noclipEnabled then
-        rootPart.CFrame = rootPart.CFrame * Vector3.new(0, -noclipSpeed, 0)
-    end
-end
-
-game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessedEvent)
-    if gameProcessedEvent then return end -- prevent game processing
-
-    if input.KeyCode == Enum.KeyCode.E then
+UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+    if input.KeyCode == Enum.KeyCode.E and not gameProcessedEvent then
         toggleNoclip()
-    elseif input.KeyCode == Enum.KeyCode.W then
-        moveForward()
-    elseif input.KeyCode == Enum.KeyCode.S then
-        moveBackward()
-    elseif input.KeyCode == Enum.KeyCode.A then
-        moveLeft()
-    elseif input.KeyCode == Enum.KeyCode.D then
-        moveRight()
-    elseif input.KeyCode == Enum.KeyCode.Space then
-        moveUp()
-    elseif input.KeyCode == Enum.KeyCode.LeftShift then
-        moveDown()
+    end
+end)
+
+localPlayer.CharacterAdded:Connect(function(newCharacter)
+    character = newCharacter
+    humanoid = character:WaitForChild("Humanoid")
+    if noclipEnabled then
+        toggleNoclip() --Reapply if player respawns while noclip is active.
     end
 end)
