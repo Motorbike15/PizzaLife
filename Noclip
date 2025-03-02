@@ -1,0 +1,20 @@
+local player = game.Players.LocalPlayer
+local noclip = false
+
+local function toggleNoclip()
+    if noclip then
+        noclip = false
+        player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        player.Character.Humanoid.PlatformStand = false
+    else
+        noclip = true
+        player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Seated)
+        player.Character.Humanoid.PlatformStand = true
+    end
+end
+
+game:GetService("UserInputService").InputBegan:Connect(function(inputObject, gameProcessedEvent)
+    if inputObject.KeyCode == Enum.KeyCode.N then
+        toggleNoclip()
+    end
+end)
