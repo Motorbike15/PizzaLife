@@ -7,6 +7,15 @@ local LocalPlayer = Players.LocalPlayer
 local flingForce = 1000 -- Adjust the fling force as needed
 local flingDuration = 0.5 -- Adjust the duration as needed
 
+local function getPlayerByUsername(partialName)
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player.Name:lower():sub(1, #partialName) == partialName:lower() then
+            return player
+        end
+    end
+    return nil
+end
+
 local function getClosestPlayer()
     local closestPlayer = nil
     local closestDistance = math.huge
@@ -30,9 +39,7 @@ local function getClosestPlayer()
     return closestPlayer
 end
 
-local function flingPlayer()
-    local targetPlayer = getClosestPlayer()
-
+local function flingPlayer(targetPlayer)
     if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
         local targetHumanoidRootPart = targetPlayer.Character.HumanoidRootPart
 
@@ -59,6 +66,12 @@ end
 
 UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
     if input.KeyCode == Enum.KeyCode.T and not gameProcessedEvent then -- Change "T" to your preferred key
-        flingPlayer()
+        local partialName = game:GetService("Chat"):GetChatBar().Text
+        local targetPlayer = getPlayerByUsername(partialName)
+        if targetPlayer then
+            flingPlayer(targetPlayer)
+        else
+            flingPlayer(getClosestPlayer())
+        end
     end
 end)
