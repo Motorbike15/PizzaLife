@@ -1,20 +1,76 @@
 local player = game.Players.LocalPlayer
-local noclip = false
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local rootPart = character:WaitForChild("HumanoidRootPart")
 
-local function toggleNoclip()
-    if noclip then
-        noclip = false
-        player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-        player.Character.Humanoid.PlatformStand = false
-    else
-        noclip = true
-        player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Seated)
-        player.Character.Humanoid.PlatformStand = true
+local canWalkThrough = false
+
+local function toggleWalkThrough()
+  canWalkThrough = not canWalkThrough
+
+  if canWalkThrough then
+    -- Disable collisions for all parts in the character
+    for _, part in ipairs(character:GetDescendants()) do
+      if part:IsA("BasePart") then
+        part.CanCollide = false
+      end
     end
+    print("Walk through enabled.")
+  else
+    -- Re-enable collisions for all parts in the character
+    for _, part in ipairs(character:GetDescendants()) do
+      if part:IsA("BasePart") then
+        part.CanCollide = true
+      end
+    end
+    print("Walk through disabled.")
+  end
 end
 
-game:GetService("UserInputService").InputBegan:Connect(function(inputObject, gameProcessedEvent)
-    if inputObject.KeyCode == Enum.KeyCode.N then
-        toggleNoclip()
-    end
+local userInputService = game:GetService("UserInputService")
+
+userInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+  if gameProcessedEvent then return end -- If the game already processed the input, ignore it
+
+  if input.KeyCode == Enum.KeyCode.E then
+    toggleWalkThrough()
+  end
 end)
+
+-- Ensure character is loaded before running
+player.CharacterAdded:Connect(function(char)
+        character = char
+        humanoid = character:WaitForChild("Humanoid")
+        rootPart = character:WaitForChild("HumanoidRootPart")
+        --reset collision states on character respawn
+        if canWalkThrough then
+                for _, part in ipairs(character:GetDescendants()) do
+                        if part:IsA("BasePart") then
+                                part.CanCollide = false
+                        end
+                end
+        else
+                for _, part in ipairs(character:GetDescendants()) do
+                        if part:IsA("BasePart") then
+                                part.CanCollide = true
+                        end
+                end
+        end
+end)
+
+-- Initial character collision state setup on load
+if character then
+        if canWalkThrough then
+                for _, part in ipairs(character:GetDescendants()) do
+                        if part:IsA("BasePart") then
+                                part.CanCollide = false
+                        end
+                end
+        else
+                for _, part in ipairs(character:GetDescendants()) do
+                        if part:IsA("BasePart") then
+                                part.CanCollide = true
+                        end
+                end
+        end
+end
