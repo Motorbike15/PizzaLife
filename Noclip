@@ -1,59 +1,70 @@
-local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
-local PhysicsService = game:GetService("PhysicsService")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 
 local localPlayer = Players.LocalPlayer
-local character = localPlayer.Character or localPlayer.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
+local mouse = localPlayer:GetMouse()
 
-local noclipEnabled = false
-local noclipCollisionGroupName = "NoclipPlayers"
+local rawMetatable = getrawmetatable(game)
+local originalIndex = rawMetatable.__index
+local originalNewIndex = rawMetatable.__newindex
+local originalNameCall = rawMetatable.__namecall
+local isTrustedCaller = checkcaller or is_protosmasher_caller
 
-PhysicsService:CreateCollisionGroup(noclipCollisionGroupName)
-PhysicsService:CollisionGroupSetCollidable(noclipCollisionGroupName, "Default", false)
+local noClipEnabled = false
+local noClipToggleKey = Enum.KeyCode.X -- Use Enum.KeyCode for clarity
 
-local function toggleNoclip()
-    noclipEnabled = not noclipEnabled
+setreadonly(rawMetatable, false)
 
-    if noclipEnabled then
-        for _, part in ipairs(character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                PhysicsService:SetPartCollisionGroup(part, noclipCollisionGroupName)
-            end
+-- Notification Function (Replace with your preferred notification method)
+local function showNotification(title, message, duration)
+    -- Replace this with your notification implementation
+    warn("Notification: " .. title .. " - " .. message)
+    wait(duration)
+end
+
+showNotification("zxciaz", "Press F9 for Directions", 4)
+warn("NoClip + Bypass made by zxciaz")
+warn("Press " .. noClipToggleKey.Name .. " to turn off and on NoClip")
+
+-- Metatable Modification
+rawMetatable.__newindex = newcclosure(function(self, property, value)
+    if isTrustedCaller() then
+        return originalNewIndex(self, property, value)
+    end
+
+    if tostring(self) == "HumanoidRootPart" or tostring(self) == "Torso" then
+        if property == "CFrame" and self:IsDescendantOf(localPlayer.Character) then
+            return true -- Credits to ze_lI for this
         end
-        humanoid:SetState(Enum.HumanoidStateType.Physics)
-        -- Optional: Visual feedback
-        for _, part in ipairs(character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.Transparency = 0.5
-            end
-        end
-    else
-        for _, part in ipairs(character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                PhysicsService:SetPartCollisionGroup(part, "Default")
-            end
-        end
-        humanoid:SetState(Enum.HumanoidStateType.Running)
-        -- Optional: Revert visual feedback
-        for _, part in ipairs(character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.Transparency = 0
-            end
+    end
+
+    return originalNewIndex(self, property, value)
+end)
+
+setreadonly(rawMetatable, true)
+
+-- NoClip Toggle
+local function toggleNoClip()
+    noClipEnabled = not noClipEnabled
+    showNotification("zxciaz", "NoClip: " .. tostring(noClipEnabled), 3)
+
+    local character = localPlayer.Character
+    if character and character:FindFirstChild("Humanoid") then
+        local humanoid = character:FindFirstChild("Humanoid")
+        if noClipEnabled then
+            humanoid.WalkSpeed = 0
+            humanoid.JumpPower = 0
+        else
+            humanoid.WalkSpeed = 16 -- Reset to default walk speed
+            humanoid.JumpPower = 50 -- Reset to default jump power
         end
     end
 end
 
+-- Input Handling
 UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
-    if input.KeyCode == Enum.KeyCode.E and not gameProcessedEvent then
-        toggleNoclip()
-    end
-end)
-
-localPlayer.CharacterAdded:Connect(function(newCharacter)
-    character = newCharacter
-    humanoid = character:WaitForChild("Humanoid")
-    if noclipEnabled then
-        toggleNoclip() --Reapply if player respawns while noclip is active.
+    if input.KeyCode == noClipToggleKey and not gameProcessedEvent then
+        toggleNoClip()
     end
 end)
