@@ -1,8 +1,11 @@
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
+local userInputService = game:GetService("UserInputService")
+local runService = game:GetService("RunService")
+
 local noclip = false
 
-local function toggleNoclip()
+function toggleNoclip()
 	noclip = not noclip
 	if noclip then
 		for _, part in pairs(character:GetDescendants()) do
@@ -19,15 +22,23 @@ local function toggleNoclip()
 	end
 end
 
-local UserInputService = game:GetService("UserInputService")
-UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
-	if input.KeyCode == Enum.KeyCode.T and not gameProcessedEvent then
+userInputService.InputBegan:Connect(function(input, gameProcessed)
+	if not gameProcessed and input.KeyCode == Enum.KeyCode.N then
 		toggleNoclip()
 	end
 end)
 
-game:GetService("RunService").Stepped:Connect(function()
+runService.RenderStepped:Connect(function()
 	if noclip then
-		character.HumanoidRootPart.CFrame = character.HumanoidRootPart.CFrame + Vector3.new(0, 0, 0)
+		for _, part in pairs(workspace:GetChildren()) do
+			if part:IsA("BasePart") and part.Transparency < 0.5 then
+				local distance = (character.HumanoidRootPart.Position - part.Position).magnitude
+				if distance < 10 then
+					part.Transparency = 0.5
+				else
+					part.Transparency = 0
+				end
+			end
+		end
 	end
 end)
