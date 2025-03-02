@@ -2,6 +2,7 @@ local NoclipEnabled = false
 local Player = game:GetService("Players").LocalPlayer
 local Character = Player.Character or Player.CharacterAdded:Wait()
 local Humanoid = Character:WaitForChild("Humanoid")
+local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 
 -- Create a toggle button (replace with your actual button creation)
 local ToggleButton = Instance.new("TextButton") 
@@ -13,9 +14,9 @@ local function ToggleNoclip()
     NoclipEnabled = not NoclipEnabled
 
     if NoclipEnabled then
-        -- Disable collisions for all character parts
+        -- Disable collisions for all character parts EXCEPT HumanoidRootPart
         for _, part in pairs(Character:GetDescendants()) do
-            if part:IsA("BasePart") then
+            if part:IsA("BasePart") and part ~= HumanoidRootPart then
                 part.CanCollide = false
             end
         end
@@ -24,7 +25,7 @@ local function ToggleNoclip()
     else
         -- Re-enable collisions and reset PlatformStand
         for _, part in pairs(Character:GetDescendants()) do
-            if part:IsA("BasePart") then
+            if part:IsA("BasePart") and part ~= HumanoidRootPart then
                 part.CanCollide = true
             end
         end
