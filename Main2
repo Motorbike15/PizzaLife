@@ -1,0 +1,401 @@
+if game.PlaceId == 155615604 then
+
+local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/UI-Interface/CustomFIeld/main/RayField.lua'))()
+
+    local Window = Rayfield:CreateWindow({
+   Name = "Prison Life Rework 💢",
+   LoadingTitle = "FourPlanes Hub",
+   LoadingSubtitle = "by Fourplanes",
+   ConfigurationSaving = {
+      Enabled = true,
+      FolderName = nil, -- Create a custom folder for your hub/game
+      FileName = "Prison Hub"
+   },
+   Discord = {
+      Enabled = false,
+      Invite = "sirius", -- The Discord invite code, do not include discord.gg/
+      RememberJoins = true -- Set this to false to make them join the discord every time they load it up
+   },
+   KeySystem = False, -- Set this to true to use our key system
+   KeySettings = {
+      Title = "Fourplanes Hub | Key",
+      Subtitle = "Key System",
+      Note = "Ask Fourplanes for the Key.)",
+      FileName = "Fourplanes Key",
+      SaveKey = True,
+      GrabKeyFromSite = false, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
+      Key = "FourPlanesTwoTowers"
+   }
+})
+
+local MainTab = Window:CreateTab("Main", nil) -- Title, Image
+local MainSection = MainTab:CreateSection("Main")
+
+Rayfield:Notify({
+	Title = "You executed the script!",
+	Content = "Please tell Fourplanes if its broken!",
+	Duration = 6.5,
+	Image = nil,
+	Actions = { -- Notification Buttons
+		Ignore = {
+			Name = "Thanks!",
+			Callback = function()
+				print("The user tapped Okay!")
+			end
+		},
+	},
+})
+
+local Button = MainTab:CreateButton({
+   Name = "Infinite Jump",
+   Info = "Makes you able to fly- Untill you stop.", -- Speaks for itself, Remove if none.
+   Interact = 'Changable',
+   Callback = function()
+loadstring(game:HttpGet("https://cdn.wearedevs.net/scripts/Infinite%20Jump.txt"))()
+   end,
+})
+
+
+local Button = MainTab:CreateButton({
+   Name = "Flight",
+   Info = "Makes you able to fly- Untill you stop jumping.", -- Speaks for itself, Remove if none.
+   Interact = 'Changable',
+   Callback = function()
+loadstring(game:HttpGet("https://cdn.wearedevs.net/scripts/Fly.txt"))()
+   end,
+})
+    
+local Slider = MainTab:CreateSlider({
+   Name = "Walkspeed",
+   Info = "Makes you walk faster.", -- Speaks for itself, Remove if none.
+   Range = {16, 500},
+   Increment = 10,
+   Suffix = "Speed",
+   CurrentValue = 16,
+   Flag = "Slider1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+            game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = (Value)
+   end,
+})
+
+
+
+local Button = MainTab:CreateButton({
+   Name = "Press E to Toggle Noclip",
+   Info = "Phase Through Objects", -- Speaks for itself, Remove if none.
+   Interact = 'Click',
+   Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Motorbike15/PizzaLife/refs/heads/main/Noclip")
+                )
+end
+})
+
+local TeleportTab = Window:CreateTab("Teleports", nil) -- Title, Image
+local Section = TeleportTab:CreateSection("Areas",false) -- The 2nd argument is to tell if its only a Title and doesnt contain elements
+
+-- Yard Button
+local Button = TeleportTab:CreateButton({
+    Name = "Yard",
+    Info = "To Magically go to the Yard.",
+    Interact = 'Changable',
+    Callback = function()
+        local function teleport(x, y, z)
+            local player = game.Players.LocalPlayer
+            local character = player.Character or player.CharacterAdded:Wait()
+            local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+            if humanoidRootPart then
+                humanoidRootPart.CFrame = CFrame.new(Vector3.new(x, y, z))
+                print("Teleported to " .. x .. ", " .. y .. ", " .. z)
+            else
+                warn("HumanoidRootPart not found.")
+            end
+        end
+
+        teleport(807.47, 98.00, 2460.97)
+    end,
+})
+
+
+-- Cafeteria Button
+local Button = TeleportTab:CreateButton({
+    Name = "Cafeteria",
+    Info = "To Magically go to the Cafeteria.",
+    Interact = 'Changable',
+    Callback = function()
+        local function teleport(x, y, z)
+            local player = game.Players.LocalPlayer
+            local character = player.Character or player.CharacterAdded:Wait()
+            local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+            if humanoidRootPart then
+                humanoidRootPart.CFrame = CFrame.new(Vector3.new(x, y, z))
+                print("Teleported to " .. x .. ", " .. y .. ", " .. z)
+            else
+                warn("HumanoidRootPart not found.")
+            end
+        end
+
+        teleport(921.09, 99.99, 2292.90)
+    end,
+})
+
+-- Gate Button
+local Button = TeleportTab:CreateButton({
+    Name = "Gate",
+    Info = "To Magically go to the Gate.",
+    Interact = 'Changable',
+    Callback = function()
+        local function teleport(x, y, z)
+            local player = game.Players.LocalPlayer
+            local character = player.Character or player.CharacterAdded:Wait()
+            local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+            if humanoidRootPart then
+                humanoidRootPart.CFrame = CFrame.new(Vector3.new(x, y, z))
+                print("Teleported to " .. x .. ", " .. y .. ", " .. z)
+            else
+                warn("HumanoidRootPart not found.")
+            end
+        end
+
+        teleport(658.02, 95.49, 2354.81)
+    end,
+})
+
+-- Armory Button
+local Button = TeleportTab:CreateButton({
+    Name = "Armory",
+    Info = "To Magically go to the Armory.",
+    Interact = 'Changable',
+    Callback = function()
+        local function teleport(x, y, z)
+            local player = game.Players.LocalPlayer
+            local character = player.Character or player.CharacterAdded:Wait()
+            local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+            if humanoidRootPart then
+                humanoidRootPart.CFrame = CFrame.new(Vector3.new(x, y, z))
+                print("Teleported to " .. x .. ", " .. y .. ", " .. z)
+            else
+                warn("HumanoidRootPart not found.")
+            end
+        end
+
+        teleport(827.19, 99.96, 2257.52)
+    end,
+})
+
+-- CrimBase Button
+local Button = TeleportTab:CreateButton({
+    Name = "CrimBase",
+    Info = "To Magically go to the CrimBase.",
+    Interact = 'Changable',
+    Callback = function()
+        local function teleport(x, y, z)
+            local player = game.Players.LocalPlayer
+            local character = player.Character or player.CharacterAdded:Wait()
+            local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+            if humanoidRootPart then
+                humanoidRootPart.CFrame = CFrame.new(Vector3.new(x, y, z))
+                print("Teleported to " .. x .. ", " .. y .. ", " .. z)
+            else
+                warn("HumanoidRootPart not found.")
+            end
+        end
+
+        teleport(-939.85, 94.13, 2066.88)
+    end,
+})
+
+
+local Button = MainTab:CreateButton({
+   Name = "ESP",
+   Info = "Shows Players", -- Speaks for itself, Remove if none.
+   Interact = 'Not Changeable',
+   Callback = function()
+        loadstring(game:HttpGet("https://cdn.wearedevs.net/scripts/WRD%20ESP.txt"))()
+end
+})
+
+local HubTab = Window:CreateTab("Other Hacks", nil) -- Title, Image
+local Section = HubTab:CreateSection("Possibly Unsafe",false) -- The 2nd argument is to tell if its only a Title and doesnt contain elements
+
+local Button = HubTab:CreateButton({
+   Name = "Prizz Life",
+   Info = "Possibly Unsafe", -- Speaks for itself, Remove if none.
+   Interact = 'Not Changeable',
+   Callback = function()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/devguy100/PrizzLife/main/Source/release_v0.8.1.lua'))()
+end
+})
+
+local Button = HubTab:CreateButton({
+   Name = "Zephyr Life",
+   Info = "Possibly Unsafe", -- Speaks for itself, Remove if none.
+   Interact = 'Not Changeable',
+   Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Unknownlodfc/Zephyr/refs/heads/main/Zephyr%20%7C%20Prison%20Life"))() 
+end
+})
+
+local Button = MainTab:CreateButton({
+   Name = "Vehicle Fly",
+   Info = "Possibly Broken", -- Speaks for itself, Remove if none.
+   Interact = 'Not Changeable',
+   Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Motorbike15/PizzaLife/refs/heads/main/Vehicle%20Fly")
+                )
+end
+})
+
+
+local Button = MainTab:CreateButton({
+   Name = "PlayerFling",
+   Info = "Possibly Broken", -- Speaks for itself, Remove if none.
+   Interact = 'Repeatable',
+   Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Motorbike15/PizzaLife/refs/heads/main/PlayerFling")
+                )
+end
+})
+
+local Input = TeleportTab:CreateInput({ -- Changed MainTab to TeleportTab
+    Name = "Teleport To User",
+    Info = "Put in the Target's Username",
+    PlaceholderText = "Enter Username",
+    NumbersOnly = false,
+    CharacterLimit = 30,
+    OnEnter = true,
+    RemoveTextAfterFocusLost = false,
+    Callback = function(Text)
+        local targetUsername = Text
+        local players = game:GetService("Players")
+        local localPlayer = players.LocalPlayer
+
+        if not localPlayer or not localPlayer.Character or not localPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            warn("Local player character or HumanoidRootPart not found.")
+            return
+        end
+
+        local targetPlayer = players:FindFirstChild(targetUsername)
+
+        if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            local success, errorMessage = pcall(function()
+                localPlayer.Character:MoveTo(targetPlayer.Character.HumanoidRootPart.Position)
+            end)
+
+            if not success then
+                warn("Error moving to target: " .. errorMessage)
+            end
+        else
+            warn("Target player not found or target character/HumanoidRootPart not found.")
+        end
+    end,
+})
+
+--[[
+A distribution of https://wearedevs.net/scripts
+Last updated August 2, 2021
+
+Description: Magnetizes you to the selected player's character. To choose a player,
+enter their name in the "PlayerName" input field.
+
+Instruction: Inject this script into any game using a Lua executor like JJSploit.
+]]
+
+-- Assuming TeleportTab is already defined in your environment
+
+local Input = TeleportTab:CreateInput({
+    Name = "Magnetize",
+    Info = "Put in the Target's Username",
+    PlaceholderText = "Enter Username",
+    NumbersOnly = false,
+    CharacterLimit = 30,
+    OnEnter = true,
+    RemoveTextAfterFocusLost = false,
+    Callback = function(Text)
+        _G.MagnetizeToTarget = Text -- Store the entered username
+
+        -- Find the target player
+        local targetPlayer = game:GetService("Players"):FindFirstChild(_G.MagnetizeToTarget)
+        if targetPlayer then
+            -- Magnetize to the target player
+            game:GetService('RunService').Stepped:connect(function()
+                for i,v in pairs (game:GetService("Players").LocalPlayer.Character:GetChildren()) do
+                    if v:IsA("BasePart") then
+                        v.CanCollide = true
+                    end
+                end
+            end)
+
+            b = Instance.new("RocketPropulsion")
+            b.Parent = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart
+            b.Target = targetPlayer.Character.HumanoidRootPart
+            b.TurnP = 20000
+            b.MaxThrust = 20000
+            b.MaxSpeed = 1000
+            b.ThrustP = 13000
+            b:Fire()
+        else
+            print("Player '" .. _G.MagnetizeToTarget .. "' not found.")
+        end
+    end
+})
+
+
+local Input = TeleportTab:CreateInput({
+    Name = "Loop Magnetize",
+    Info = "Put in the Target's Username",
+    PlaceholderText = "Enter Username",
+    NumbersOnly = false,
+    CharacterLimit = 30,
+    OnEnter = true,
+    RemoveTextAfterFocusLost = false,
+    Callback = function(Text)
+        _G.MagnetizeToTarget = Text
+
+        local function magnetizeToTarget()
+            local targetPlayer = game:GetService("Players"):FindFirstChild(_G.MagnetizeToTarget)
+            local localPlayer = game:GetService("Players").LocalPlayer
+
+            if targetPlayer and targetPlayer.Character and localPlayer and localPlayer.Character then
+                -- Disable collisions
+                for i,v in pairs (localPlayer.Character:GetChildren()) do
+                    if v:IsA("BasePart") then
+                        v.CanCollide = true
+                    end
+                end
+
+                -- Magnetization loop
+                while true do
+                    if targetPlayer.Character and localPlayer.Character then
+                        local targetRootPart = targetPlayer.Character.HumanoidRootPart
+                        local localRootPart = localPlayer.Character.HumanoidRootPart
+                        local direction = (targetRootPart.Position - localRootPart.Position).Unit
+                        localRootPart.CFrame = CFrame.new(localRootPart.Position, localRootPart.Position + direction)
+                    end
+                    wait()
+                end
+            else
+                wait(0.1)
+                magnetizeToTarget()
+            end
+        end
+
+        magnetizeToTarget()
+
+        -- Event listeners for character respawning
+        local function onCharacterAdded(char)
+            magnetizeToTarget()
+        end
+
+        localPlayer.CharacterAdded:Connect(onCharacterAdded)
+        if targetPlayer then
+            targetPlayer.CharacterAdded:Connect(onCharacterAdded)
+        end
+    end
+})
+
+end
