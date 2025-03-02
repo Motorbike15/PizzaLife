@@ -1,44 +1,79 @@
-local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local userInputService = game:GetService("UserInputService")
-local runService = game:GetService("RunService")
+local Noclipping = nil
+local Clip = true -- Initialize Clip to true (noclip disabled)
 
-local noclip = false
-
-function toggleNoclip()
-	noclip = not noclip
-	if noclip then
-		for _, part in pairs(character:GetDescendants()) do
-			if part:IsA("BasePart") then
-				part.CanCollide = false
-			end
-		end
-	else
-		for _, part in pairs(character:GetDescendants()) do
-			if part:IsA("BasePart") then
-				part.CanCollide = true
-			end
-		end
-	end
+-- Function to send notifications (replace with your notification system)
+local function notify(title, message)
+    -- Example using print (replace with your GUI notification)
+    print("Notification: " .. title .. " - " .. message)
 end
 
-userInputService.InputBegan:Connect(function(input, gameProcessed)
-	if not gameProcessed and input.KeyCode == Enum.KeyCode.N then
-		toggleNoclip()
-	end
+-- Function to execute commands (replace with your command execution system)
+local function execCmd(command)
+    -- Example command execution (replace with your command system)
+    if command == 'noclip' then
+        local args = {}
+        local speaker = game.Players.LocalPlayer -- Or however you get the speaker
+        addcmd('noclip', {}, function(args, speaker) end)(args, speaker) -- Execute the noclip command
+    elseif command == 'clip' then
+        local args = {}
+        local speaker = game.Players.LocalPlayer
+        addcmd('clip', {'unnoclip'}, function(args, speaker) end)(args, speaker) -- Execute the clip command
+    end
+end
+
+-- Function to add commands (replace with your command adding system)
+local function addcmd(commandName, aliases, commandFunction)
+    -- Example command adding (replace with your command system)
+    return commandFunction
+end
+
+local RunService = game:GetService("RunService")
+local floatName = "HumanoidRootPart" -- Assuming HumanoidRootPart should collide
+
+addcmd('noclip', {}, function(args, speaker)
+    Clip = false
+    wait(0.1)
+    local function NoclipLoop()
+        if Clip == false and speaker.Character ~= nil then
+            for _, child in pairs(speaker.Character:GetDescendants()) do
+                if child:IsA("BasePart") and child.CanCollide == true and child.Name ~= floatName then
+                    child.CanCollide = false
+                end
+            end
+        end
+    end
+    Noclipping = RunService.Stepped:Connect(NoclipLoop)
+    if args[1] and args[1] == 'nonotify' then return end
+    notify('Noclip', 'Noclip Enabled')
 end)
 
-runService.RenderStepped:Connect(function()
-	if noclip then
-		for _, part in pairs(workspace:GetChildren()) do
-			if part:IsA("BasePart") and part.Transparency < 0.5 then
-				local distance = (character.HumanoidRootPart.Position - part.Position).magnitude
-				if distance < 10 then
-					part.Transparency = 0.5
-				else
-					part.Transparency = 0
-				end
-			end
-		end
-	end
+addcmd('clip', {'unnoclip'}, function(args, speaker)
+    if Noclipping then
+        Noclipping:Disconnect()
+    end
+    Clip = true
+    if args[1] and args[1] == 'nonotify' then return end
+    notify('Noclip', 'Noclip Disabled')
+end)
+
+addcmd('togglenoclip', {}, function(args, speaker)
+    if Clip then
+        execCmd('noclip')
+    else
+        execCmd('clip')
+    end
+end)
+
+-- Example usage (you'll need to integrate this into your existing framework)
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+
+-- Example: Toggle noclip with the 'T' key
+local userInputService = game:GetService("UserInputService")
+userInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+    if input.KeyCode == Enum.KeyCode.T and not gameProcessedEvent then
+        local args = {}
+        local speaker = game.Players.LocalPlayer
+        addcmd('togglenoclip', {}, function(args, speaker) end)(args, speaker)
+    end
 end)
