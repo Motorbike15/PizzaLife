@@ -3,24 +3,66 @@ local character = player.Character or player.CharacterAdded:Wait()
 local rootPart = character:WaitForChild("HumanoidRootPart")
 
 local noclipEnabled = false
+local noclipSpeed = 5 -- Speed of movement in studs
 
 local function toggleNoclip()
     noclipEnabled = not noclipEnabled
-    rootPart.CanCollide = not noclipEnabled -- Simplified collision toggle
+    rootPart.CanCollide = not noclipEnabled
     print("Noclip toggled:", noclipEnabled)
 end
 
 local function moveForward()
     if noclipEnabled then
-        rootPart.CFrame = rootPart.CFrame * CFrame.new(0, 0, -5) -- Move 5 studs forward
+        rootPart.CFrame = rootPart.CFrame * rootPart.CFrame.LookVector * noclipSpeed
+    end
+end
+
+local function moveBackward()
+    if noclipEnabled then
+        rootPart.CFrame = rootPart.CFrame * -rootPart.CFrame.LookVector * noclipSpeed
+    end
+end
+
+local function moveLeft()
+    if noclipEnabled then
+         rootPart.CFrame = rootPart.CFrame * -rootPart.CFrame.RightVector * noclipSpeed
+    end
+end
+
+local function moveRight()
+    if noclipEnabled then
+        rootPart.CFrame = rootPart.CFrame * rootPart.CFrame.RightVector * noclipSpeed
+    end
+end
+
+local function moveUp()
+    if noclipEnabled then
+        rootPart.CFrame = rootPart.CFrame * Vector3.new(0, noclipSpeed, 0)
+    end
+end
+
+local function moveDown()
+    if noclipEnabled then
+        rootPart.CFrame = rootPart.CFrame * Vector3.new(0, -noclipSpeed, 0)
     end
 end
 
 game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessedEvent)
-    if input.KeyCode == Enum.KeyCode.E and not gameProcessedEvent then
+    if gameProcessedEvent then return end -- prevent game processing
+
+    if input.KeyCode == Enum.KeyCode.E then
         toggleNoclip()
-    end
-    if input.KeyCode == Enum.KeyCode.W and not gameProcessedEvent then
+    elseif input.KeyCode == Enum.KeyCode.W then
         moveForward()
+    elseif input.KeyCode == Enum.KeyCode.S then
+        moveBackward()
+    elseif input.KeyCode == Enum.KeyCode.A then
+        moveLeft()
+    elseif input.KeyCode == Enum.KeyCode.D then
+        moveRight()
+    elseif input.KeyCode == Enum.KeyCode.Space then
+        moveUp()
+    elseif input.KeyCode == Enum.KeyCode.LeftShift then
+        moveDown()
     end
 end)
