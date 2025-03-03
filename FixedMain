@@ -71,7 +71,7 @@ local Slider = MainTab:CreateSlider({
 
 
 local Button = MainTab:CreateButton({
-   Name = "Press E to Toggle Noclip",
+   Name = "Broken Noclip",
    Info = "Phase Through Objects", -- Speaks for itself, Remove if none.
    Interact = 'Click',
    Callback = function()
@@ -201,6 +201,16 @@ local Button = TeleportTab:CreateButton({
 
 
 local Button = MainTab:CreateButton({
+   Name = "Flight",
+   Info = "Lets you be a plane", -- Speaks for itself, Remove if none.
+   Interact = 'Change with e',
+   Callback = function()
+        loadstring(game:HttpGet("https://cdn.wearedevs.net/scripts/Fly.txt"))()
+end
+})
+
+
+local Button = MainTab:CreateButton({
    Name = "ESP",
    Info = "Shows Players", -- Speaks for itself, Remove if none.
    Interact = 'Not Changeable',
@@ -231,7 +241,7 @@ end
 })
 
 local Button = MainTab:CreateButton({
-   Name = "Vehicle Fly",
+   Name = "Broken Vehicle Fly",
    Info = "Possibly Broken", -- Speaks for itself, Remove if none.
    Interact = 'Not Changeable',
    Callback = function()
@@ -242,7 +252,7 @@ end
 
 
 local Button = MainTab:CreateButton({
-   Name = "PlayerFling",
+   Name = "Broken Fling",
    Info = "Possibly Broken", -- Speaks for itself, Remove if none.
    Interact = 'Repeatable',
    Callback = function()
