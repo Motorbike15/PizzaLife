@@ -83,13 +83,11 @@ end
 local Button = MainTab:CreateButton({
    Name = "Broken Noclip",
    Info = "Phase Through Objects", -- Speaks for itself, Remove if none.
-   Interact = 'Click',
+Interact = 'Click',
    Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
-                )
 end
 })
-
 
 local TeleportTab = Window:CreateTab("Teleports", nil) -- Title, Image
 local Section = TeleportTab:CreateSection("Areas",false) -- The 2nd argument is to tell if its only a Title and doesnt contain elements
