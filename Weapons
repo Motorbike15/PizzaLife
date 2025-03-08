@@ -1,0 +1,50 @@
+local player = game.Players.LocalPlayer
+
+function GetGun(name)
+    local attr = workspace.Prison_ITEMS.giver or workspace.Prison_ITEMS.single
+    if attr then
+        return attr:FindFirstChild(name)
+    end
+end
+
+function GrabGun(name)
+    local event = workspace.Remote.ItemHandler
+    local gun = GetGun(name)
+    if gun then -- Check if the gun exists before invoking the server
+        event:InvokeServer({ Position = player.Character.Head.Position, Parent = gun })
+    else
+        warn("Gun not found: " .. name) -- Inform if gun does not exist.
+    end
+end
+
+function HasPass()
+    local service = game:GetService("MarketplaceService")
+    for _, id in ipairs({ 96651, 643697197 }) do
+        local success, ownsPass = pcall(function()
+            return service:UserOwnsGamePassAsync(player.UserId, id)
+        end)
+        if success and ownsPass then
+            return true
+        elseif not success then
+            warn("Error checking Game Pass: " .. id) -- Inform if gamepass check fails.
+        end
+    end
+    return false
+end
+
+local function grabAllGuns()
+    GrabGun("AK-47")
+    GrabGun("Remington 870")
+    GrabGun("M9")
+
+    -- game pass
+    if HasPass() then
+        GrabGun("M4A1")
+    end
+end
+
+-- Loop the gun grabbing
+while true do
+    grabAllGuns()
+    wait(5) -- Wait 5 seconds before grabbing again. Adjust as needed.
+end
