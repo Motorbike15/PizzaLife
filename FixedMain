@@ -99,81 +99,14 @@ end
 })
 
 
-local Toggle = MainTab:CreateToggle({
-   Name = "Infinite Guns",
-   CurrentValue = false,
-   Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
-   Callback = function(Value)
-local LoopWeaponsEnabled = false -- Track the state of LoopWeapons
-
-local function loadLoopWeapons()
-    if not LoopWeaponsEnabled then
-        local success, err = pcall(function()
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/Motorbike15/PizzaLife/refs/heads/main/LoopWeapons?token=GHSAT0AAAAAAC7WJXVI2V3I7TJFFBIY3HSQZ6M6AEA"))()
-            LoopWeaponsEnabled = true
-        end)
-        if not success then
-            warn("Error loading LoopWeapons:", err)
-        end
-    end
+local Button = MainTab:CreateButton({
+   Name = "One Life Guns! (NEW)",
+   Info = "Give you Infinite Power!", -- Speaks for itself, Remove if none.
+Interact = 'Click',
+   Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Motorbike15/PizzaLife/refs/heads/main/OneLifeGuns?token=GHSAT0AAAAAAC7WJXVILK7N4RL3X4LIN42OZ6M6MXQ"))()
 end
-
-local function unloadLoopWeapons()
-    -- There's no standard way to *unload* a loadstring'd script in Roblox.
-    -- The best you can do is try to disable or destroy any objects it created.
-    -- If the loaded script creates a loop or persistent object, you must know how to disable that within the loaded script itself.
-    -- Because we cannot reliably unload the looped weapons, we will just set the enable variable to false.
-    LoopWeaponsEnabled = false
-    warn("LoopWeapons unloaded (simulation only).")
-end
-
-local Toggle = Tab:CreateToggle({
-    Name = "Loop Weapons Toggle",
-    CurrentValue = false,
-    Flag = "LoopWeaponsToggle",
-    Callback = function(Value)
-        if Value then
-            loadLoopWeapons()
-        else
-            unloadLoopWeapons()
-        end
-    end,
 })
-
--- Example of how to add the second loadstring if needed, also toggleable.
-local OneLifeGunsEnabled = false;
-
-local function loadOneLifeGuns()
-    if not OneLifeGunsEnabled then
-        local success, err = pcall(function()
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/Motorbike15/PizzaLife/refs/heads/main/OneLifeGuns?token=GHSAT0AAAAAAC7WJXVJBPA5D5NYAL47IIF2Z6M6AQQ"))()
-            OneLifeGunsEnabled = true;
-        end)
-        if not success then
-            warn("Error loading OneLifeGuns:", err)
-        end
-    end
-end
-
-local function unloadOneLifeGuns()
-    OneLifeGunsEnabled = false;
-    warn("OneLifeGuns unloaded (simulation only).")
-end
-
-local Toggle2 = Tab:CreateToggle({
-    Name = "One Life Guns Toggle",
-    CurrentValue = false,
-    Flag = "OneLifeGunsToggle",
-    Callback = function(Value)
-        if Value then
-            loadOneLifeGuns()
-        else
-            unloadOneLifeGuns()
-        end
-    end,
-})
-
-
 
 local TeleportTab = Window:CreateTab("Teleports", nil) -- Title, Image
 local Section = TeleportTab:CreateSection("Areas",false) -- The 2nd argument is to tell if its only a Title and doesnt contain elements
