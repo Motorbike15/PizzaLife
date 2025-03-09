@@ -1,0 +1,32 @@
+player = game.Players.LocalPlayer
+
+function GetGun(name)
+    local attr = workspace.Prison_ITEMS.giver or workspace.Prison_ITEMS.single
+    if attr then
+        return attr:FindFirstChild(name)
+    end
+end
+
+function GrabGun(name)
+    local event = workspace.Remote.ItemHandler
+    local gun = GetGun(name)
+    event:InvokeServer({ Position = player.Character.Head.Position, Parent = gun })
+end
+
+function HasPass()
+    local service = game:service("MarketplaceService")
+    for _, id in ipairs({ 96651, 643697197 }) do
+        if service:UserOwnsGamePassAsync(player.UserId, id) then
+            return true
+        end
+    end
+end
+
+GrabGun("AK-47")
+GrabGun("Remington 870")
+GrabGun("M9")
+
+-- game pass
+if HasPass() then
+    GrabGun("M4A1")
+end
