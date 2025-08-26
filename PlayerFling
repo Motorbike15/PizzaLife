@@ -3,24 +3,11 @@ local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 
 local LocalPlayer = Players.LocalPlayer
-
 local flingForce = 1200
 local flingUpForce = 80
-local flingDuration = 2.5
 local randomness = 10
 
--- Get player by partial name
-local function getPlayerByUsername(partialName)
-    partialName = partialName:lower()
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player.Name:lower():find(partialName, 1, true) then
-            return player
-        end
-    end
-    return nil
-end
-
--- Get closest player
+-- Find closest player
 local function getClosestPlayer()
     local closestPlayer = nil
     local closestDistance = math.huge
@@ -32,7 +19,6 @@ local function getClosestPlayer()
             if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
                 local targetHRP = player.Character.HumanoidRootPart
                 local distance = (localHRP.Position - targetHRP.Position).Magnitude
-
                 if distance < closestDistance then
                     closestDistance = distance
                     closestPlayer = player
@@ -40,71 +26,39 @@ local function getClosestPlayer()
             end
         end
     end
-
     return closestPlayer
 end
 
--- Client-side fling effect
-local function flingPlayer(targetPlayer)
-    if not targetPlayer or not targetPlayer.Character or not targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        return
+-- Visual fling effect (client-side only)
+local function flingVisual(targetPlayer)
+    if not targetPlayer or not targetPlayer.Character or not targetPlayer.Character:FindFirstChild("HumanoidRootPart") then return end
+
+    local HRP = targetPlayer.Character.HumanoidRootPart
+    -- Fake effect: move your own character away from them for fun
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        local localHRP = LocalPlayer.Character.HumanoidRootPart
+        local direction = (HRP.Position - localHRP.Position).Unit
+        local velocity = Vector3.new(
+            direction.X * flingForce + math.random(-randomness, randomness),
+            flingUpForce,
+            direction.Z * flingForce + math.random(-randomness, randomness)
+        )
+        local bodyVelocity = Instance.new("BodyVelocity")
+        bodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+        bodyVelocity.Velocity = velocity
+        bodyVelocity.Parent = localHRP
+
+        game:GetService("Debris"):AddItem(bodyVelocity, 2.5)
     end
-
-    local targetHRP = targetPlayer.Character.HumanoidRootPart
-
-    -- Use a BodyVelocity locally
-    local bodyVelocity = Instance.new("BodyVelocity")
-    bodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-    bodyVelocity.Parent = targetHRP
-
-    local startTime = tick()
-    local connection
-
-    connection = RunService.Heartbeat:Connect(function()
-        if tick() - startTime >= flingDuration or not targetHRP.Parent then
-            bodyVelocity:Destroy()
-            connection:Disconnect()
-            return
-        end
-
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            local localHRP = LocalPlayer.Character.HumanoidRootPart
-            local direction = (targetHRP.Position - localHRP.Position).Unit
-
-            local randomOffset = Vector3.new(
-                math.random(-randomness, randomness),
-                0,
-                math.random(-randomness, randomness)
-            )
-
-            -- Apply local arc fling
-            bodyVelocity.Velocity = Vector3.new(
-                direction.X * flingForce + randomOffset.X,
-                flingUpForce,
-                direction.Z * flingForce + randomOffset.Z
-            )
-        end
-    end)
 end
 
--- Input listener
+-- Input
 UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
     if gameProcessedEvent then return end
     if input.KeyCode == Enum.KeyCode.T then
-        local chatService = game:GetService("Chat")
-        local partialName = ""
-        if chatService:FindFirstChild("ChatBar") and chatService.ChatBar:IsA("TextBox") then
-            partialName = chatService.ChatBar.Text
-        end
-
-        local targetPlayer = getPlayerByUsername(partialName)
-        if targetPlayer then
-            flingPlayer(targetPlayer)
-        else
-            local closest = getClosestPlayer()
-            if closest then
-                flingPlayer(closest)
-            end
+        local closest = getClosestPlayer()
+        if closest then
+            flingVisual(closest)
         end
     end
 end)
