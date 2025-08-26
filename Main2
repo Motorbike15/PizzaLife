@@ -364,7 +364,7 @@ local Input = TeleportTab:CreateInput({
                 -- Disable collisions
                 for i,v in pairs (localPlayer.Character:GetChildren()) do
                     if v:IsA("BasePart") then
-                        v.CanCollide = true
+                        v.CanCollide = false
                     end
                 end
 
