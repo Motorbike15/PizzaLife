@@ -5,7 +5,7 @@ local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 
 local flingForce = 1000 -- Adjust the fling force as needed
-local flingDuration = 0.5 -- Adjust the duration as needed
+local flingDuration = 2.5 -- Adjust the duration as needed
 
 local function getPlayerByUsername(partialName)
     for _, player in ipairs(Players:GetPlayers()) do
